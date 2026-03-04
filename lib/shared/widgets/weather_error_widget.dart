@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/app_theme.dart';
+import '../../core/l10n/app_localizations.dart';
 
 class WeatherErrorWidget extends StatelessWidget {
   final String message;
@@ -15,6 +16,7 @@ class WeatherErrorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -46,7 +48,7 @@ class WeatherErrorWidget extends StatelessWidget {
               FilledButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Try Again'),
+                label: Text(l10n.tryAgain),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.accent,
                   foregroundColor: Colors.white,
@@ -74,8 +76,9 @@ class NoInternetWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return WeatherErrorWidget(
-      message: 'No internet connection.\nPlease check your network settings.',
+      message: l10n.noInternetMessage,
       icon: Icons.wifi_off_rounded,
       onRetry: onRetry,
     );
@@ -87,8 +90,9 @@ class EmptySearchWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const WeatherErrorWidget(
-      message: 'No cities found.\nTry a different search term.',
+    final l10n = AppLocalizations.of(context);
+    return WeatherErrorWidget(
+      message: l10n.noSearchResults,
       icon: Icons.search_off_rounded,
     );
   }

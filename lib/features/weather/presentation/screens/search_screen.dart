@@ -86,7 +86,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to load weather: $e'),
+            content: Text('${AppLocalizations.of(context).failedToLoadWeather}: $e'),
             backgroundColor: Colors.redAccent,
           ),
         );

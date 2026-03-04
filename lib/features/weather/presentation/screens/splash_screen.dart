@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/app_theme.dart';
 import '../../../../core/app_router.dart';
 import '../../../../core/constants.dart';
+import '../../data/location_service.dart';
 import '../providers/weather_providers.dart';
 import '../../../../features/settings/providers/settings_providers.dart';
 
@@ -51,20 +52,50 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     _fadeController.forward();
     _scaleController.forward();
 
-    // Navigate to home after loading default city weather
+    // Navigate to home after loading weather
     _loadAndNavigate();
   }
 
   Future<void> _loadAndNavigate() async {
     final locale = ref.read(localeProvider);
     final lang = locale.languageCode;
+    final savedCities = ref.read(savedCitiesProvider);
 
-    // Start fetching default city weather
-    ref.read(weatherNotifierProvider.notifier).fetchWeather(
-          ApiConstants.defaultLat,
-          ApiConstants.defaultLon,
-          lang: lang,
-        );
+    if (savedCities.isNotEmpty) {
+      // Returning user: load weather for selected city
+      final selectedIndex = ref.read(selectedCityIndexProvider);
+      final cityIndex = selectedIndex < savedCities.length ? selectedIndex : 0;
+      final city = savedCities[cityIndex];
+      ref.read(weatherNotifierProvider.notifier).fetchWeather(
+            city.location.lat,
+            city.location.lon,
+            lang: lang,
+          );
+    } else {
+      // First launch: try to get current GPS location
+      double lat = ApiConstants.defaultLat;
+      double lon = ApiConstants.defaultLon;
+
+      final position = await LocationService.getCurrentPosition();
+      if (position != null) {
+        lat = position.latitude;
+        lon = position.longitude;
+      }
+
+      // Fetch weather for current location (or fallback to HCM)
+      ref.read(weatherNotifierProvider.notifier).fetchWeather(
+            lat,
+            lon,
+            lang: lang,
+          );
+
+      // Wait for weather to load, then add to saved cities
+      await Future.delayed(const Duration(milliseconds: 2000));
+      final weatherState = ref.read(weatherNotifierProvider);
+      if (weatherState.weather != null) {
+        ref.read(savedCitiesProvider.notifier).addCity(weatherState.weather!);
+      }
+    }
 
     // Wait for animation + minimum splash time
     await Future.delayed(const Duration(milliseconds: 2500));

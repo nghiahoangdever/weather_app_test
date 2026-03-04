@@ -1,7 +1,20 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/weather_api_service.dart';
 import '../../data/weather_repository.dart';
 import '../../data/weather_models.dart';
+import '../../data/local_storage_service.dart';
+
+// ----- SharedPreferences Provider -----
+
+final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
+  throw UnimplementedError('SharedPreferences must be overridden at startup');
+});
+
+final localStorageServiceProvider = Provider<LocalStorageService>((ref) {
+  final prefs = ref.watch(sharedPreferencesProvider);
+  return LocalStorageService(prefs);
+});
 
 // ----- Core Service Providers -----
 
@@ -87,7 +100,19 @@ final weatherNotifierProvider =
 // ----- Saved Cities Provider -----
 
 class SavedCitiesNotifier extends StateNotifier<List<Weather>> {
-  SavedCitiesNotifier() : super([]);
+  final LocalStorageService _storage;
+
+  SavedCitiesNotifier(this._storage) : super([]) {
+    _loadFromStorage();
+  }
+
+  void _loadFromStorage() {
+    state = _storage.loadCities();
+  }
+
+  void _saveToStorage() {
+    _storage.saveCities(state);
+  }
 
   void addCity(Weather weather) {
     // Check if city already exists
@@ -104,11 +129,13 @@ class SavedCitiesNotifier extends StateNotifier<List<Weather>> {
         return w;
       }).toList();
     }
+    _saveToStorage();
   }
 
   void removeCity(int index) {
     if (index >= 0 && index < state.length) {
       state = [...state]..removeAt(index);
+      _saveToStorage();
     }
   }
 
@@ -117,6 +144,7 @@ class SavedCitiesNotifier extends StateNotifier<List<Weather>> {
       final city = state[index];
       final newList = [...state]..removeAt(index);
       state = [city, ...newList];
+      _saveToStorage();
     }
   }
 
@@ -127,15 +155,20 @@ class SavedCitiesNotifier extends StateNotifier<List<Weather>> {
       }
       return w;
     }).toList();
+    _saveToStorage();
   }
 }
 
 final savedCitiesProvider =
     StateNotifierProvider<SavedCitiesNotifier, List<Weather>>((ref) {
-  return SavedCitiesNotifier();
+  final storage = ref.watch(localStorageServiceProvider);
+  return SavedCitiesNotifier(storage);
 });
 
-final selectedCityIndexProvider = StateProvider<int>((ref) => 0);
+final selectedCityIndexProvider = StateProvider<int>((ref) {
+  final storage = ref.watch(localStorageServiceProvider);
+  return storage.loadSelectedCityIndex();
+});
 
 // ----- Search Providers -----
 

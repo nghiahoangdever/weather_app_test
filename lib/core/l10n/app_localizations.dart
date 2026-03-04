@@ -76,6 +76,16 @@ class AppLocalizations {
       'home': 'Home',
       'locations': 'Locations',
       'weather': 'Weather',
+      // New keys for localization fixes
+      'cancel': 'Cancel',
+      'confirmRemoveCity': 'Remove {city} from saved cities?',
+      'failedToLoadWeather': 'Failed to load weather',
+      'noInternetMessage':
+          'No internet connection.\nPlease check your network settings.',
+      'noSearchResults':
+          'No cities found.\nTry a different search term.',
+      'setAsDefaultSnack': '{city} set as default',
+      'defaultBadge': 'DEFAULT',
     },
     'vi': {
       'appName': 'Thời Tiết',
@@ -140,6 +150,16 @@ class AppLocalizations {
       'home': 'Trang chủ',
       'locations': 'Địa điểm',
       'weather': 'Thời tiết',
+      // New keys for localization fixes
+      'cancel': 'Hủy',
+      'confirmRemoveCity': 'Xóa {city} khỏi danh sách đã lưu?',
+      'failedToLoadWeather': 'Không thể tải dữ liệu thời tiết',
+      'noInternetMessage':
+          'Không có kết nối internet.\nVui lòng kiểm tra cài đặt mạng.',
+      'noSearchResults':
+          'Không tìm thấy thành phố.\nThử từ khóa khác.',
+      'setAsDefaultSnack': '{city} đã được đặt làm mặc định',
+      'defaultBadge': 'MẶC ĐỊNH',
     },
   };
 
@@ -147,6 +167,15 @@ class AppLocalizations {
     return _localizedValues[locale.languageCode]?[key] ??
         _localizedValues['en']?[key] ??
         key;
+  }
+
+  /// Translate with parameter substitution
+  String translateWith(String key, Map<String, String> params) {
+    var result = translate(key);
+    params.forEach((paramKey, value) {
+      result = result.replaceAll('{$paramKey}', value);
+    });
+    return result;
   }
 
   // Convenience getters
@@ -185,6 +214,16 @@ class AppLocalizations {
   String get home => translate('home');
   String get locations => translate('locations');
   String get weather => translate('weather');
+  String get cancel => translate('cancel');
+  String get failedToLoadWeather => translate('failedToLoadWeather');
+  String get noInternetMessage => translate('noInternetMessage');
+  String get noSearchResults => translate('noSearchResults');
+  String get defaultBadge => translate('defaultBadge');
+
+  String confirmRemoveCity(String cityName) =>
+      translateWith('confirmRemoveCity', {'city': cityName});
+  String setAsDefaultSnack(String cityName) =>
+      translateWith('setAsDefaultSnack', {'city': cityName});
 }
 
 class _AppLocalizationsDelegate

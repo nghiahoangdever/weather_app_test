@@ -116,11 +116,11 @@ class CitiesScreen extends ConsumerWidget {
                   builder: (context) => AlertDialog(
                     title: Text(l10n.translate('removeCity')),
                     content: Text(
-                        'Remove ${weather.location.name} from saved cities?'),
+                        l10n.confirmRemoveCity(weather.location.name)),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(false),
-                        child: const Text('Cancel'),
+                        child: Text(l10n.cancel),
                       ),
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(true),
@@ -154,6 +154,8 @@ class CitiesScreen extends ConsumerWidget {
             onTap: () {
               // Set as selected city and go back
               ref.read(selectedCityIndexProvider.notifier).state = index;
+              final storage = ref.read(localStorageServiceProvider);
+              storage.saveSelectedCityIndex(index);
               ref.read(weatherNotifierProvider.notifier).fetchWeather(
                     weather.location.lat,
                     weather.location.lon,
@@ -168,7 +170,7 @@ class CitiesScreen extends ConsumerWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content:
-                      Text('${weather.location.name} set as default'),
+                      Text(l10n.setAsDefaultSnack(weather.location.name)),
                   backgroundColor: AppColors.accent,
                   behavior: SnackBarBehavior.floating,
                   shape: RoundedRectangleBorder(
@@ -237,8 +239,8 @@ class CitiesScreen extends ConsumerWidget {
                                     color: AppColors.accent,
                                     borderRadius: BorderRadius.circular(6),
                                   ),
-                                  child: const Text(
-                                    'DEFAULT',
+                                  child: Text(
+                                    l10n.defaultBadge,
                                     style: TextStyle(
                                       fontSize: 9,
                                       fontWeight: FontWeight.w700,

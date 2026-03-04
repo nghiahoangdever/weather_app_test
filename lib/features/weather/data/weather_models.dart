@@ -54,6 +54,22 @@ class WeatherLocation {
     );
   }
 
+  factory WeatherLocation.fromStoredJson(Map<String, dynamic> json) {
+    return WeatherLocation(
+      name: json['name'] ?? '',
+      country: json['country'] ?? '',
+      lat: (json['lat'] as num).toDouble(),
+      lon: (json['lon'] as num).toDouble(),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'country': country,
+        'lat': lat,
+        'lon': lon,
+      };
+
   String get cacheKey => '${lat.toStringAsFixed(2)}_${lon.toStringAsFixed(2)}';
 }
 
@@ -116,6 +132,44 @@ class CurrentWeather {
     );
   }
 
+  factory CurrentWeather.fromStoredJson(Map<String, dynamic> json) {
+    return CurrentWeather(
+      temp: (json['temp'] as num).toDouble(),
+      feelsLike: (json['feelsLike'] as num).toDouble(),
+      tempMin: (json['tempMin'] as num).toDouble(),
+      tempMax: (json['tempMax'] as num).toDouble(),
+      humidity: json['humidity'] as int,
+      windSpeed: (json['windSpeed'] as num).toDouble(),
+      description: json['description'] ?? '',
+      mainCondition: json['mainCondition'] ?? '',
+      conditionCode: json['conditionCode'] as int,
+      icon: json['icon'] ?? '01d',
+      uvIndex: (json['uvIndex'] as num?)?.toDouble(),
+      sunrise: json['sunrise'] as int,
+      sunset: json['sunset'] as int,
+      visibility: json['visibility'] as int? ?? 10000,
+      pressure: (json['pressure'] as num?)?.toDouble(),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'temp': temp,
+        'feelsLike': feelsLike,
+        'tempMin': tempMin,
+        'tempMax': tempMax,
+        'humidity': humidity,
+        'windSpeed': windSpeed,
+        'description': description,
+        'mainCondition': mainCondition,
+        'conditionCode': conditionCode,
+        'icon': icon,
+        'uvIndex': uvIndex,
+        'sunrise': sunrise,
+        'sunset': sunset,
+        'visibility': visibility,
+        'pressure': pressure,
+      };
+
   /// Convert Kelvin to Celsius
   double get tempCelsius => temp - 273.15;
   double get feelsLikeCelsius => feelsLike - 273.15;
@@ -168,6 +222,32 @@ class HourlyForecast {
     );
   }
 
+  factory HourlyForecast.fromStoredJson(Map<String, dynamic> json) {
+    return HourlyForecast(
+      dateTime: DateTime.fromMillisecondsSinceEpoch(json['dt'] as int),
+      temp: (json['temp'] as num).toDouble(),
+      description: json['description'] ?? '',
+      mainCondition: json['mainCondition'] ?? '',
+      conditionCode: json['conditionCode'] as int,
+      icon: json['icon'] ?? '01d',
+      humidity: json['humidity'] as int,
+      windSpeed: (json['windSpeed'] as num).toDouble(),
+      pop: (json['pop'] as num?)?.toDouble(),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'dt': dateTime.millisecondsSinceEpoch,
+        'temp': temp,
+        'description': description,
+        'mainCondition': mainCondition,
+        'conditionCode': conditionCode,
+        'icon': icon,
+        'humidity': humidity,
+        'windSpeed': windSpeed,
+        'pop': pop,
+      };
+
   double get tempCelsius => temp - 273.15;
   double get tempFahrenheit => (temp - 273.15) * 9 / 5 + 32;
 }
@@ -193,6 +273,30 @@ class DailyForecast {
     this.pop,
   });
 
+  factory DailyForecast.fromStoredJson(Map<String, dynamic> json) {
+    return DailyForecast(
+      date: DateTime.fromMillisecondsSinceEpoch(json['date'] as int),
+      tempMin: (json['tempMin'] as num).toDouble(),
+      tempMax: (json['tempMax'] as num).toDouble(),
+      description: json['description'] ?? '',
+      mainCondition: json['mainCondition'] ?? '',
+      conditionCode: json['conditionCode'] as int,
+      icon: json['icon'] ?? '01d',
+      pop: (json['pop'] as num?)?.toDouble(),
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'date': date.millisecondsSinceEpoch,
+        'tempMin': tempMin,
+        'tempMax': tempMax,
+        'description': description,
+        'mainCondition': mainCondition,
+        'conditionCode': conditionCode,
+        'icon': icon,
+        'pop': pop,
+      };
+
   double get tempMinCelsius => tempMin - 273.15;
   double get tempMaxCelsius => tempMax - 273.15;
   double get tempMinFahrenheit => (tempMin - 273.15) * 9 / 5 + 32;
@@ -213,6 +317,36 @@ class Weather {
     required this.dailyForecast,
     DateTime? fetchedAt,
   }) : fetchedAt = fetchedAt ?? DateTime.now();
+
+  factory Weather.fromStoredJson(Map<String, dynamic> json) {
+    return Weather(
+      location: WeatherLocation.fromStoredJson(
+          json['location'] as Map<String, dynamic>),
+      current: CurrentWeather.fromStoredJson(
+          json['current'] as Map<String, dynamic>),
+      hourlyForecast: (json['hourlyForecast'] as List?)
+              ?.map((e) =>
+                  HourlyForecast.fromStoredJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      dailyForecast: (json['dailyForecast'] as List?)
+              ?.map((e) =>
+                  DailyForecast.fromStoredJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+      fetchedAt: json['fetchedAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['fetchedAt'] as int)
+          : null,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'location': location.toJson(),
+        'current': current.toJson(),
+        'hourlyForecast': hourlyForecast.map((e) => e.toJson()).toList(),
+        'dailyForecast': dailyForecast.map((e) => e.toJson()).toList(),
+        'fetchedAt': fetchedAt.millisecondsSinceEpoch,
+      };
 
   String get cacheKey => location.cacheKey;
 }

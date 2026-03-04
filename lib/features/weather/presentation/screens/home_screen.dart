@@ -149,7 +149,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               final newLocale = locale.languageCode == 'en'
                   ? const Locale('vi')
                   : const Locale('en');
-              ref.read(localeProvider.notifier).state = newLocale;
+              ref.read(localeProvider.notifier).setLocale(newLocale);
               // Re-fetch weather with new language
               if (weatherState.weather != null) {
                 ref.read(weatherNotifierProvider.notifier).fetchWeather(
@@ -757,8 +757,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ],
                     selected: {locale.languageCode},
                     onSelectionChanged: (selected) {
-                      ref.read(localeProvider.notifier).state =
-                          Locale(selected.first);
+                      ref.read(localeProvider.notifier)
+                          .setLocale(Locale(selected.first));
                     },
                     style: ButtonStyle(
                       visualDensity: VisualDensity.compact,
@@ -778,8 +778,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ],
                     selected: {tempUnit},
                     onSelectionChanged: (selected) {
-                      ref.read(temperatureUnitProvider.notifier).state =
-                          selected.first;
+                      ref.read(temperatureUnitProvider.notifier)
+                          .setUnit(selected.first);
                     },
                     style: ButtonStyle(
                       visualDensity: VisualDensity.compact,
@@ -793,8 +793,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   value: themeMode == ThemeMode.dark,
                   activeColor: AppColors.accent,
                   onChanged: (value) {
-                    ref.read(themeModeProvider.notifier).state =
-                        value ? ThemeMode.dark : ThemeMode.light;
+                    ref.read(themeModeProvider.notifier)
+                        .setThemeMode(value ? ThemeMode.dark : ThemeMode.light);
                   },
                 ),
                 const SizedBox(height: 16),
