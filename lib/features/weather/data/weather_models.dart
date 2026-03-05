@@ -179,6 +179,8 @@ class CurrentWeather {
   /// Convert Kelvin to Fahrenheit
   double get tempFahrenheit => (temp - 273.15) * 9 / 5 + 32;
   double get feelsLikeFahrenheit => (feelsLike - 273.15) * 9 / 5 + 32;
+  double get tempMinFahrenheit => (tempMin - 273.15) * 9 / 5 + 32;
+  double get tempMaxFahrenheit => (tempMax - 273.15) * 9 / 5 + 32;
 }
 
 class HourlyForecast {

@@ -1,6 +1,6 @@
 name: mobile_weather_app
-description: "A beautiful weather forecast app with glassmorphism UI."
-publish_to: 'none'
+description: "Weather forecast app with glassmorphism UI."
+publish_to: "none"
 version: 1.0.0+1
 
 environment:

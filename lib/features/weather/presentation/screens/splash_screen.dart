@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/app_theme.dart';
 import '../../../../core/app_router.dart';
 import '../../../../core/constants.dart';
+import '../../../../core/responsive_helper.dart';
 import '../../data/location_service.dart';
 import '../providers/weather_providers.dart';
 import '../../../../features/settings/providers/settings_providers.dart';
@@ -145,61 +146,63 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               ),
             );
           },
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Weather Icon
-              Container(
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.1),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    width: 2,
+          child: ResponsiveCenter(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Weather Icon
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.1),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      width: 2,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.wb_sunny_rounded,
+                    size: 64,
+                    color: AppColors.accent,
                   ),
                 ),
-                child: const Icon(
-                  Icons.wb_sunny_rounded,
-                  size: 64,
-                  color: AppColors.accent,
-                ),
-              ),
-              const SizedBox(height: 32),
-              // App Name
-              const Text(
-                'Weather',
-                style: TextStyle(
-                  fontSize: 42,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  letterSpacing: 2,
-                ),
-              ),
-              const SizedBox(height: 8),
-              // Subtitle
-              Text(
-                'Forecast & Radar',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white.withValues(alpha: 0.7),
-                  letterSpacing: 4,
-                ),
-              ),
-              const SizedBox(height: 60),
-              // Loading indicator
-              SizedBox(
-                width: 32,
-                height: 32,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Colors.white.withValues(alpha: 0.6),
+                const SizedBox(height: 32),
+                // App Name
+                const Text(
+                  'Weather',
+                  style: TextStyle(
+                    fontSize: 42,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    letterSpacing: 2,
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 8),
+                // Subtitle
+                Text(
+                  'Forecast & Radar',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white.withValues(alpha: 0.7),
+                    letterSpacing: 4,
+                  ),
+                ),
+                const SizedBox(height: 60),
+                // Loading indicator
+                SizedBox(
+                  width: 32,
+                  height: 32,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Colors.white.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/app_theme.dart';
 import '../../../../core/app_router.dart';
 import '../../../../core/l10n/app_localizations.dart';
+import '../../../../core/responsive_helper.dart';
 import '../../../../features/settings/providers/settings_providers.dart';
 import '../../../../shared/widgets/glass_container.dart';
 import '../../../../shared/widgets/weather_icon_mapper.dart';
@@ -35,7 +36,7 @@ class CitiesScreen extends ConsumerWidget {
       ),
       body: savedCities.isEmpty
           ? _buildEmptyState(context, l10n, isDark)
-          : _buildCityList(
+          : _buildCityContent(
               context, ref, savedCities, selectedIndex, tempUnit, l10n, isDark),
     );
   }
@@ -87,7 +88,7 @@ class CitiesScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildCityList(
+  Widget _buildCityContent(
     BuildContext context,
     WidgetRef ref,
     List savedCities,
@@ -96,193 +97,215 @@ class CitiesScreen extends ConsumerWidget {
     AppLocalizations l10n,
     bool isDark,
   ) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: savedCities.length,
-      itemBuilder: (context, index) {
-        final weather = savedCities[index];
-        final current = weather.current;
-        final isCelsius = tempUnit == TemperatureUnit.celsius;
-        final temp =
-            isCelsius ? current.tempCelsius : current.tempFahrenheit;
-        final isDefault = index == selectedIndex;
+    final hPadding = ResponsiveHelper.horizontalPadding(context);
+    final columns = ResponsiveHelper.cityGridColumns(context);
+    final isGrid = columns > 1;
 
-        return Dismissible(
-          key: ValueKey(weather.location.cacheKey),
-          direction: DismissDirection.endToStart,
-          confirmDismiss: (direction) async {
-            return await showDialog<bool>(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text(l10n.translate('removeCity')),
-                    content: Text(
-                        l10n.confirmRemoveCity(weather.location.name)),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(false),
-                        child: Text(l10n.cancel),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(true),
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.redAccent,
-                        ),
-                        child: Text(l10n.translate('removeCity')),
-                      ),
-                    ],
-                  ),
-                ) ??
-                false;
-          },
-          onDismissed: (direction) {
-            ref.read(savedCitiesProvider.notifier).removeCity(index);
-            if (selectedIndex >= savedCities.length - 1) {
-              ref.read(selectedCityIndexProvider.notifier).state = 0;
-            }
-          },
-          background: Container(
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.only(right: 24),
-            margin: const EdgeInsets.only(bottom: 12),
-            decoration: BoxDecoration(
-              color: Colors.redAccent,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Icon(Icons.delete_rounded, color: Colors.white),
-          ),
-          child: GestureDetector(
-            onTap: () {
-              // Set as selected city and go back
-              ref.read(selectedCityIndexProvider.notifier).state = index;
-              final storage = ref.read(localStorageServiceProvider);
-              storage.saveSelectedCityIndex(index);
-              ref.read(weatherNotifierProvider.notifier).fetchWeather(
-                    weather.location.lat,
-                    weather.location.lon,
-                    lang: ref.read(localeProvider).languageCode,
-                  );
-              Navigator.of(context).pop();
-            },
-            onLongPress: () {
-              // Set as default
-              ref.read(savedCitiesProvider.notifier).setDefault(index);
-              ref.read(selectedCityIndexProvider.notifier).state = 0;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content:
-                      Text(l10n.setAsDefaultSnack(weather.location.name)),
-                  backgroundColor: AppColors.accent,
-                  behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              );
-            },
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              child: GlassContainer(
-                backgroundColor: isDefault
-                    ? AppColors.accent.withValues(alpha: 0.12)
-                    : (isDark
-                        ? Colors.white.withValues(alpha: 0.06)
-                        : Colors.white.withValues(alpha: 0.8)),
-                padding: const EdgeInsets.all(18),
-                child: Row(
-                  children: [
-                    // Weather icon
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: WeatherIconMapper.getIconColor(
-                                current.conditionCode)
-                            .withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Icon(
-                        WeatherIconMapper.getIcon(current.conditionCode),
-                        color: WeatherIconMapper.getIconColor(
-                            current.conditionCode),
-                        size: 26,
-                      ),
+    Widget buildItem(int index) {
+      final weather = savedCities[index];
+      final current = weather.current;
+      final isCelsius = tempUnit == TemperatureUnit.celsius;
+      final temp =
+          isCelsius ? current.tempCelsius : current.tempFahrenheit;
+      final isDefault = index == selectedIndex;
+
+      return Dismissible(
+        key: ValueKey(weather.location.cacheKey),
+        direction: DismissDirection.endToStart,
+        confirmDismiss: (direction) async {
+          return await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: Text(l10n.removeCity),
+                  content: Text(
+                      l10n.confirmRemoveCity(weather.location.name)),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: Text(l10n.cancel),
                     ),
-                    const SizedBox(width: 16),
-                    // City info
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  weather.location.name,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: isDark
-                                        ? Colors.white
-                                        : AppColors.textPrimaryLight,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              if (isDefault) ...[
-                                const SizedBox(width: 6),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 6,
-                                    vertical: 2,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.accent,
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    l10n.defaultBadge,
-                                    style: TextStyle(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            current.description.isNotEmpty
-                                ? current.description[0].toUpperCase() +
-                                    current.description.substring(1)
-                                : '',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: isDark
-                                  ? Colors.white54
-                                  : AppColors.textSecondaryLight,
-                            ),
-                          ),
-                        ],
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.redAccent,
                       ),
-                    ),
-                    // Temperature
-                    Text(
-                      '${temp.round()}°',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white : AppColors.primary,
-                      ),
+                      child: Text(l10n.removeCity),
                     ),
                   ],
                 ),
+              ) ??
+              false;
+        },
+        onDismissed: (direction) {
+          ref.read(savedCitiesProvider.notifier).removeCity(index);
+          if (selectedIndex >= savedCities.length - 1) {
+            ref.read(selectedCityIndexProvider.notifier).state = 0;
+          }
+        },
+        background: Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 24),
+          margin: EdgeInsets.only(bottom: isGrid ? 0 : 12),
+          decoration: BoxDecoration(
+            color: Colors.redAccent,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: const Icon(Icons.delete_rounded, color: Colors.white),
+        ),
+        child: GestureDetector(
+          onTap: () {
+            // Set as selected city and go back
+            ref.read(selectedCityIndexProvider.notifier).state = index;
+            final storage = ref.read(localStorageServiceProvider);
+            storage.saveSelectedCityIndex(index);
+            ref.read(weatherNotifierProvider.notifier).fetchWeather(
+                  weather.location.lat,
+                  weather.location.lon,
+                  lang: ref.read(localeProvider).languageCode,
+                );
+            Navigator.of(context).pop();
+          },
+          onLongPress: () {
+            // Set as default
+            ref.read(savedCitiesProvider.notifier).setDefault(index);
+            ref.read(selectedCityIndexProvider.notifier).state = 0;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content:
+                    Text(l10n.setAsDefaultSnack(weather.location.name)),
+                backgroundColor: AppColors.accent,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            );
+          },
+          child: Container(
+            margin: EdgeInsets.only(bottom: isGrid ? 0 : 12),
+            child: GlassContainer(
+              backgroundColor: isDefault
+                  ? AppColors.accent.withValues(alpha: 0.12)
+                  : (isDark
+                      ? Colors.white.withValues(alpha: 0.06)
+                      : Colors.white.withValues(alpha: 0.8)),
+              padding: const EdgeInsets.all(18),
+              child: Row(
+                children: [
+                  // Weather icon
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: WeatherIconMapper.getIconColor(
+                              current.conditionCode)
+                          .withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Icon(
+                      WeatherIconMapper.getIcon(current.conditionCode),
+                      color: WeatherIconMapper.getIconColor(
+                          current.conditionCode),
+                      size: 26,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // City info
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                weather.location.name,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark
+                                      ? Colors.white
+                                      : AppColors.textPrimaryLight,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (isDefault) ...[
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.accent,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  l10n.defaultBadge,
+                                  style: const TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          current.description.isNotEmpty
+                              ? current.description[0].toUpperCase() +
+                                  current.description.substring(1)
+                              : '',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: isDark
+                                ? Colors.white54
+                                : AppColors.textSecondaryLight,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Temperature
+                  Text(
+                    '${temp.round()}°',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white : AppColors.primary,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-        );
-      },
+        ),
+      );
+    }
+
+    return ResponsiveCenter(
+      padding: EdgeInsets.symmetric(horizontal: hPadding, vertical: 16),
+      child: isGrid
+          ? GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: columns,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 2.5,
+              ),
+              itemCount: savedCities.length,
+              itemBuilder: (context, index) => buildItem(index),
+            )
+          : ListView.builder(
+              itemCount: savedCities.length,
+              itemBuilder: (context, index) => buildItem(index),
+            ),
     );
   }
 }

@@ -5,6 +5,7 @@ import '../../../../core/app_theme.dart';
 import '../../../../core/app_router.dart';
 import '../../../../core/constants.dart';
 import '../../../../core/l10n/app_localizations.dart';
+import '../../../../core/responsive_helper.dart';
 import '../../../../features/settings/providers/settings_providers.dart';
 import '../../../../shared/widgets/glass_container.dart';
 import '../../../../shared/widgets/shimmer_loading.dart';
@@ -24,7 +25,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     with TickerProviderStateMixin {
   late final AnimationController _heroController;
   late final AnimationController _cardsController;
-  late final PageController _pageController;
 
   @override
   void initState() {
@@ -37,7 +37,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       duration: const Duration(milliseconds: 1200),
       vsync: this,
     );
-    _pageController = PageController();
+
 
     _heroController.forward();
     Future.delayed(const Duration(milliseconds: 300), () {
@@ -49,7 +49,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   void dispose() {
     _heroController.dispose();
     _cardsController.dispose();
-    _pageController.dispose();
     super.dispose();
   }
 
@@ -193,15 +192,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   Widget _buildContent(BuildContext context, WeatherState weatherState,
       AppLocalizations l10n, TemperatureUnit tempUnit, bool isDark) {
+    final hPadding = ResponsiveHelper.horizontalPadding(context);
+    final isWide = !ResponsiveHelper.isMobile(context);
+
     if (weatherState.status == WeatherStatus.loading &&
         weatherState.weather == null) {
-      return SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          children: const [
-            WeatherShimmerHero(),
-            WeatherShimmerCards(),
-          ],
+      return ResponsiveCenter(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.symmetric(horizontal: hPadding),
+          child: Column(
+            children: const [
+              WeatherShimmerHero(),
+              WeatherShimmerCards(),
+            ],
+          ),
         ),
       );
     }
@@ -228,22 +232,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       backgroundColor: isDark ? AppColors.cardDark : Colors.white,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          children: [
-            // Hero Section
-            _buildHeroSection(weather, tempUnit, l10n),
-            const SizedBox(height: 24),
-            // 24-Hour Forecast
-            _buildHourlyForecast(weather, tempUnit, l10n, isDark),
-            const SizedBox(height: 20),
-            // 7-Day Forecast
-            _buildDailyForecast(weather, tempUnit, l10n, isDark),
-            const SizedBox(height: 20),
-            // Weather Stats Grid
-            _buildStatsGrid(weather, l10n, isDark),
-            const SizedBox(height: 30),
-          ],
+        child: ResponsiveCenter(
+          padding: EdgeInsets.symmetric(horizontal: hPadding),
+          child: Column(
+            children: [
+              // Hero Section
+              _buildHeroSection(weather, tempUnit, l10n),
+              const SizedBox(height: 24),
+              // On tablet/desktop: hourly & daily side by side
+              if (isWide) ...[
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: _buildHourlyForecast(weather, tempUnit, l10n, isDark),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildDailyForecast(weather, tempUnit, l10n, isDark),
+                    ),
+                  ],
+                ),
+              ] else ...[
+                // Mobile: stacked
+                _buildHourlyForecast(weather, tempUnit, l10n, isDark),
+                const SizedBox(height: 20),
+                _buildDailyForecast(weather, tempUnit, l10n, isDark),
+              ],
+              const SizedBox(height: 20),
+              // Weather Stats Grid
+              _buildStatsGrid(weather, l10n, isDark, context),
+              const SizedBox(height: 30),
+            ],
+          ),
         ),
       ),
     );
@@ -254,8 +275,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final current = weather.current;
     final isCelsius = tempUnit == TemperatureUnit.celsius;
     final temp = isCelsius ? current.tempCelsius : current.tempFahrenheit;
-    final high = isCelsius ? current.tempMaxCelsius : current.tempMaxCelsius * 9 / 5 + 32;
-    final low = isCelsius ? current.tempMinCelsius : current.tempMinCelsius * 9 / 5 + 32;
+    final high = isCelsius ? current.tempMaxCelsius : current.tempMaxFahrenheit;
+    final low = isCelsius ? current.tempMinCelsius : current.tempMinFahrenheit;
     final unit = isCelsius ? '°C' : '°F';
 
     return FadeTransition(
@@ -337,14 +358,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             Row(
               children: [
                 Icon(Icons.schedule_rounded,
-                    size: 18, color: isDark ? Colors.white70 : Colors.white70),
+                    size: 18, color: Colors.white70),
                 const SizedBox(width: 8),
                 Text(
                   l10n.hourlyForecast,
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: isDark ? Colors.white : Colors.white,
+                    color: Colors.white,
                   ),
                 ),
               ],
@@ -355,7 +376,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: weather.hourlyForecast.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 16),
+                separatorBuilder: (context, index) => const SizedBox(width: 16),
                 itemBuilder: (context, index) {
                   final hourly = weather.hourlyForecast[index];
                   final isCelsius = tempUnit == TemperatureUnit.celsius;
@@ -386,7 +407,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: isDark ? Colors.white : Colors.white,
+                          color: Colors.white,
                         ),
                       ),
                     ],
@@ -412,14 +433,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             Row(
               children: [
                 Icon(Icons.calendar_month_rounded,
-                    size: 18, color: isDark ? Colors.white70 : Colors.white70),
+                    size: 18, color: Colors.white70),
                 const SizedBox(width: 8),
                 Text(
                   l10n.dailyForecast,
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: isDark ? Colors.white : Colors.white,
+                    color: Colors.white,
                   ),
                 ),
               ],
@@ -462,7 +483,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: isDark ? Colors.white : Colors.white,
+                          color: Colors.white,
                         ),
                       ),
                     ),
@@ -512,7 +533,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: isDark ? Colors.white : Colors.white,
+                        color: Colors.white,
                       ),
                     ),
                   ],
@@ -526,12 +547,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   }
 
   Widget _buildStatsGrid(
-      Weather weather, AppLocalizations l10n, bool isDark) {
+      Weather weather, AppLocalizations l10n, bool isDark, BuildContext context) {
     final current = weather.current;
     final sunriseTime = DateTime.fromMillisecondsSinceEpoch(
         current.sunrise * 1000);
     final sunsetTime = DateTime.fromMillisecondsSinceEpoch(
         current.sunset * 1000);
+
+    final gridColumns = ResponsiveHelper.statsGridColumns(context);
+    final aspectRatio = ResponsiveHelper.statsChildAspectRatio(context);
 
     final stats = [
       _StatItem(l10n.humidity, '${current.humidity}%', Icons.water_drop_rounded),
@@ -553,11 +577,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: gridColumns,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 1.6,
+          childAspectRatio: aspectRatio,
         ),
         itemCount: stats.length,
         itemBuilder: (context, index) {
@@ -576,11 +600,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       color: isDark ? Colors.white54 : Colors.white60,
                     ),
                     const SizedBox(width: 6),
-                    Text(
-                      stat.label,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: isDark ? Colors.white54 : Colors.white60,
+                    Flexible(
+                      child: Text(
+                        stat.label,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? Colors.white54 : Colors.white60,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -590,7 +617,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w600,
-                    color: isDark ? Colors.white : Colors.white,
+                    color: Colors.white,
                   ),
                 ),
               ],
@@ -791,7 +818,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   secondary: const Icon(Icons.dark_mode_rounded),
                   title: Text(l10n.darkMode),
                   value: themeMode == ThemeMode.dark,
-                  activeColor: AppColors.accent,
+                  activeTrackColor: AppColors.accent,
                   onChanged: (value) {
                     ref.read(themeModeProvider.notifier)
                         .setThemeMode(value ? ThemeMode.dark : ThemeMode.light);

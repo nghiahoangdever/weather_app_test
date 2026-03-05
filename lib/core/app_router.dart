@@ -22,7 +22,7 @@ class AppRouter {
         return _slideRoute(const CitiesScreen(), settings);
       default:
         return MaterialPageRoute(
-          builder: (_) => Scaffold(
+          builder: (context) => Scaffold(
             body: Center(child: Text('Route not found: ${settings.name}')),
           ),
         );
@@ -32,9 +32,9 @@ class AppRouter {
   static Route<dynamic> _fadeRoute(Widget page, RouteSettings settings) {
     return PageRouteBuilder(
       settings: settings,
-      pageBuilder: (_, __, ___) => page,
+      pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionDuration: const Duration(milliseconds: 500),
-      transitionsBuilder: (_, animation, __, child) {
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(opacity: animation, child: child);
       },
     );
@@ -43,9 +43,9 @@ class AppRouter {
   static Route<dynamic> _slideRoute(Widget page, RouteSettings settings) {
     return PageRouteBuilder(
       settings: settings,
-      pageBuilder: (_, __, ___) => page,
+      pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionDuration: const Duration(milliseconds: 400),
-      transitionsBuilder: (_, animation, __, child) {
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final offsetAnimation = Tween<Offset>(
           begin: const Offset(1.0, 0.0),
           end: Offset.zero,
@@ -58,9 +58,9 @@ class AppRouter {
   static Route<dynamic> _slideUpRoute(Widget page, RouteSettings settings) {
     return PageRouteBuilder(
       settings: settings,
-      pageBuilder: (_, __, ___) => page,
+      pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionDuration: const Duration(milliseconds: 400),
-      transitionsBuilder: (_, animation, __, child) {
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final offsetAnimation = Tween<Offset>(
           begin: const Offset(0.0, 1.0),
           end: Offset.zero,

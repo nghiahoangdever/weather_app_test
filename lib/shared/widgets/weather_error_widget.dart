@@ -69,22 +69,6 @@ class WeatherErrorWidget extends StatelessWidget {
   }
 }
 
-class NoInternetWidget extends StatelessWidget {
-  final VoidCallback? onRetry;
-
-  const NoInternetWidget({super.key, this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return WeatherErrorWidget(
-      message: l10n.noInternetMessage,
-      icon: Icons.wifi_off_rounded,
-      onRetry: onRetry,
-    );
-  }
-}
-
 class EmptySearchWidget extends StatelessWidget {
   const EmptySearchWidget({super.key});
 

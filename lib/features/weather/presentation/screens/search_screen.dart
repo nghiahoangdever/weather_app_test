@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/app_theme.dart';
 import '../../../../core/constants.dart';
 import '../../../../core/l10n/app_localizations.dart';
+import '../../../../core/responsive_helper.dart';
 import '../../../../features/settings/providers/settings_providers.dart';
 import '../../../../shared/widgets/weather_error_widget.dart';
 import '../../data/weather_models.dart';
@@ -107,15 +108,17 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return Scaffold(
       backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
       body: SafeArea(
-        child: Column(
-          children: [
-            // Search Header
-            _buildSearchHeader(context, l10n, isDark),
-            // Results
-            Expanded(
-              child: _buildResults(searchState, l10n, isDark),
-            ),
-          ],
+        child: ResponsiveCenter(
+          child: Column(
+            children: [
+              // Search Header
+              _buildSearchHeader(context, l10n, isDark),
+              // Results
+              Expanded(
+                child: _buildResults(searchState, l10n, isDark),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -251,7 +254,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         return ListView.separated(
           padding: const EdgeInsets.symmetric(vertical: 8),
           itemCount: searchState.results.length,
-          separatorBuilder: (_, __) => Divider(
+          separatorBuilder: (context, index) => Divider(
             height: 1,
             indent: 60,
             color: isDark ? Colors.white10 : Colors.grey[200],

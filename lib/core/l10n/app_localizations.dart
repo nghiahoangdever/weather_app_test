@@ -219,6 +219,10 @@ class AppLocalizations {
   String get noInternetMessage => translate('noInternetMessage');
   String get noSearchResults => translate('noSearchResults');
   String get defaultBadge => translate('defaultBadge');
+  String get removeCity => translate('removeCity');
+  String get setDefault => translate('setDefault');
+  String get visibility => translate('visibility');
+  String get pressure => translate('pressure');
 
   String confirmRemoveCity(String cityName) =>
       translateWith('confirmRemoveCity', {'city': cityName});

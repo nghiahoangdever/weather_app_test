@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../core/responsive_helper.dart';
 
 class ShimmerLoading extends StatelessWidget {
   final double width;
@@ -72,20 +73,17 @@ class WeatherShimmerCards extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         // Stats grid shimmer
-        Row(
-          children: [
-            Expanded(child: ShimmerLoading(height: 100)),
-            const SizedBox(width: 12),
-            Expanded(child: ShimmerLoading(height: 100)),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(child: ShimmerLoading(height: 100)),
-            const SizedBox(width: 12),
-            Expanded(child: ShimmerLoading(height: 100)),
-          ],
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: ResponsiveHelper.statsGridColumns(context),
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: ResponsiveHelper.statsChildAspectRatio(context),
+          ),
+          itemCount: 6,
+          itemBuilder: (context, index) => const ShimmerLoading(height: double.infinity),
         ),
       ],
     );
