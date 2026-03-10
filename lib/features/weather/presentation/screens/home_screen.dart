@@ -94,13 +94,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             colors: isDark
                 ? [
                     AppColors.primaryDark,
-                    AppColors.primary,
-                    AppColors.surfaceDark,
+                    AppColors.primaryDark.withValues(alpha: 0.8),
+                    const Color(0xFF040924), // Even darker for bottom
                   ]
                 : [
-                    AppColors.primary,
-                    AppColors.primaryLight,
-                    AppColors.surfaceLight,
+                    const Color(0xFF1E88E5), // Blue top
+                    const Color(0xFF42A5F5), // Lighter middle
+                    const Color(0xFF64B5F6), // Soft sky blue bottom
                   ],
           ),
         ),
@@ -275,8 +275,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final current = weather.current;
     final isCelsius = tempUnit == TemperatureUnit.celsius;
     final temp = isCelsius ? current.tempCelsius : current.tempFahrenheit;
-    final high = isCelsius ? current.tempMaxCelsius : current.tempMaxFahrenheit;
-    final low = isCelsius ? current.tempMinCelsius : current.tempMinFahrenheit;
+    
+    // Use today's daily forecast for accurate high/low, fallback to current
+    final hasDaily = weather.dailyForecast.isNotEmpty;
+    final high = isCelsius 
+        ? (hasDaily ? weather.dailyForecast.first.tempMaxCelsius : current.tempMaxCelsius)
+        : (hasDaily ? weather.dailyForecast.first.tempMaxFahrenheit : current.tempMaxFahrenheit);
+    final low = isCelsius 
+        ? (hasDaily ? weather.dailyForecast.first.tempMinCelsius : current.tempMinCelsius)
+        : (hasDaily ? weather.dailyForecast.first.tempMinFahrenheit : current.tempMinFahrenheit);
+        
     final unit = isCelsius ? '°C' : '°F';
 
     return FadeTransition(
@@ -293,7 +301,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           children: [
             const SizedBox(height: 20),
             // Weather Icon
-            WeatherIconMapper.getLargeIcon(current.conditionCode, size: 72),
+            WeatherIconMapper.getLargeIcon(current.icon, size: 72),
             const SizedBox(height: 12),
             // Temperature
             Text(
@@ -396,11 +404,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           color: isDark ? Colors.white60 : Colors.white70,
                         ),
                       ),
-                      Icon(
-                        WeatherIconMapper.getIcon(hourly.conditionCode),
+                      WeatherIconMapper.getSmallIcon(
+                        hourly.icon,
                         size: 28,
-                        color: WeatherIconMapper.getIconColor(
-                            hourly.conditionCode),
                       ),
                       Text(
                         '${temp.round()}°',
@@ -488,11 +494,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Icon(
-                      WeatherIconMapper.getIcon(daily.conditionCode),
+                    WeatherIconMapper.getSmallIcon(
+                      daily.icon,
                       size: 22,
-                      color:
-                          WeatherIconMapper.getIconColor(daily.conditionCode),
                     ),
                     if (daily.pop != null && daily.pop! > 0.1) ...[
                       const SizedBox(width: 4),
@@ -565,7 +569,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           l10n.feelsLike,
           '${current.feelsLikeCelsius.round()}°',
           Icons.thermostat_rounded),
-      _StatItem(l10n.uvIndex, 'N/A', Icons.wb_sunny_outlined),
+      _StatItem(
+          l10n.airQuality,
+          _aqiLabel(current.aqi, l10n),
+          Icons.air_outlined,
+          valueColor: _aqiColor(current.aqi),
+          advice: _aqiAdvice(current.aqi, l10n)),
       _StatItem(l10n.sunrise, DateFormat.Hm().format(sunriseTime),
           Icons.wb_twilight_rounded),
       _StatItem(l10n.sunset, DateFormat.Hm().format(sunsetTime),
@@ -617,9 +626,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: stat.valueColor ?? Colors.white,
                   ),
                 ),
+                if (stat.advice != null)
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.bottomLeft,
+                      child: Text(
+                        stat.advice!,
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          height: 1.1,
+                          fontWeight: FontWeight.w500,
+                          color: isDark ? Colors.white70 : Colors.white.withValues(alpha: 0.85),
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
               ],
             ),
           );
@@ -832,12 +858,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       ),
     );
   }
+
+  /// AQI level label (localized)
+  String _aqiLabel(int? aqi, AppLocalizations l10n) {
+    switch (aqi) {
+      case 1: return l10n.aqiGood;
+      case 2: return l10n.aqiFair;
+      case 3: return l10n.aqiModerate;
+      case 4: return l10n.aqiPoor;
+      case 5: return l10n.aqiVeryPoor;
+      default: return '--';
+    }
+  }
+
+  /// AQI health advice (localized)
+  String? _aqiAdvice(int? aqi, AppLocalizations l10n) {
+    switch (aqi) {
+      case 1: return l10n.aqiAdviceGood;
+      case 2: return l10n.aqiAdviceFair;
+      case 3: return l10n.aqiAdviceModerate;
+      case 4: return l10n.aqiAdvicePoor;
+      case 5: return l10n.aqiAdviceVeryPoor;
+      default: return null;
+    }
+  }
+
+  /// AQI level color
+  Color _aqiColor(int? aqi) {
+    switch (aqi) {
+      case 1: return const Color(0xFF4CAF50); // Green
+      case 2: return const Color(0xFFCDDC39); // Yellow-green
+      case 3: return const Color(0xFFFF9800); // Orange
+      case 4: return const Color(0xFFF44336); // Red
+      case 5: return const Color(0xFF9C27B0); // Purple
+      default: return Colors.white70;
+    }
+  }
 }
 
 class _StatItem {
   final String label;
   final String value;
   final IconData icon;
+  final Color? valueColor;
+  final String? advice;
 
-  _StatItem(this.label, this.value, this.icon);
+  _StatItem(this.label, this.value, this.icon, {this.valueColor, this.advice});
 }

@@ -198,14 +198,12 @@ class CitiesScreen extends ConsumerWidget {
                     height: 48,
                     decoration: BoxDecoration(
                       color: WeatherIconMapper.getIconColor(
-                              current.conditionCode)
+                              current.icon)
                           .withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: Icon(
-                      WeatherIconMapper.getIcon(current.conditionCode),
-                      color: WeatherIconMapper.getIconColor(
-                          current.conditionCode),
+                    child: WeatherIconMapper.getSmallIcon(
+                      current.icon,
                       size: 26,
                     ),
                   ),

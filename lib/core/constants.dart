@@ -8,6 +8,7 @@ class ApiConstants {
   static const String reverseGeocodingUrl = '$baseUrl/geo/1.0/reverse';
   static const String currentWeatherUrl = '$baseUrl/data/2.5/weather';
   static const String forecastUrl = '$baseUrl/data/2.5/forecast';
+  static const String airPollutionUrl = '$baseUrl/data/2.5/air_pollution';
 
   // Cache
   static const int cacheDurationMinutes = 15;

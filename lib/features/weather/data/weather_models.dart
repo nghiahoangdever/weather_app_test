@@ -85,6 +85,7 @@ class CurrentWeather {
   final int conditionCode;
   final String icon;
   final double? uvIndex;
+  final int? aqi; // Air Quality Index: 1=Good, 2=Fair, 3=Moderate, 4=Poor, 5=Very Poor
   final int sunrise;
   final int sunset;
   final int visibility;
@@ -102,6 +103,7 @@ class CurrentWeather {
     required this.conditionCode,
     required this.icon,
     this.uvIndex,
+    this.aqi,
     required this.sunrise,
     required this.sunset,
     required this.visibility,
@@ -125,10 +127,32 @@ class CurrentWeather {
       mainCondition: weather['main'] ?? '',
       conditionCode: weather['id'] as int,
       icon: weather['icon'] ?? '01d',
+      // aqi is fetched separately from Air Pollution API
       sunrise: sys['sunrise'] as int,
       sunset: sys['sunset'] as int,
       visibility: json['visibility'] as int? ?? 10000,
       pressure: (main['pressure'] as num?)?.toDouble(),
+    );
+  }
+
+  CurrentWeather copyWith({int? aqi}) {
+    return CurrentWeather(
+      temp: temp,
+      feelsLike: feelsLike,
+      tempMin: tempMin,
+      tempMax: tempMax,
+      humidity: humidity,
+      windSpeed: windSpeed,
+      description: description,
+      mainCondition: mainCondition,
+      conditionCode: conditionCode,
+      icon: icon,
+      uvIndex: uvIndex,
+      aqi: aqi ?? this.aqi,
+      sunrise: sunrise,
+      sunset: sunset,
+      visibility: visibility,
+      pressure: pressure,
     );
   }
 
@@ -145,6 +169,7 @@ class CurrentWeather {
       conditionCode: json['conditionCode'] as int,
       icon: json['icon'] ?? '01d',
       uvIndex: (json['uvIndex'] as num?)?.toDouble(),
+      aqi: json['aqi'] as int?,
       sunrise: json['sunrise'] as int,
       sunset: json['sunset'] as int,
       visibility: json['visibility'] as int? ?? 10000,
@@ -164,6 +189,7 @@ class CurrentWeather {
         'conditionCode': conditionCode,
         'icon': icon,
         'uvIndex': uvIndex,
+        'aqi': aqi,
         'sunrise': sunrise,
         'sunset': sunset,
         'visibility': visibility,

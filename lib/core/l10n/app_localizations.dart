@@ -42,7 +42,17 @@ class AppLocalizations {
       'humidity': 'Humidity',
       'wind': 'Wind',
       'feelsLike': 'Feels Like',
-      'uvIndex': 'UV Index',
+      'airQuality': 'Air Quality',
+      'aqiGood': 'Good',
+      'aqiFair': 'Fair',
+      'aqiModerate': 'Moderate',
+      'aqiPoor': 'Poor',
+      'aqiVeryPoor': 'Very Poor',
+      'aqiAdviceGood': 'Great for outdoors',
+      'aqiAdviceFair': 'Sensitive groups beware',
+      'aqiAdviceModerate': 'Reduce outdoor time',
+      'aqiAdvicePoor': 'Air is polluted',
+      'aqiAdviceVeryPoor': 'Toxic, stay indoors',
       'sunrise': 'Sunrise',
       'sunset': 'Sunset',
       'visibility': 'Visibility',
@@ -82,8 +92,7 @@ class AppLocalizations {
       'failedToLoadWeather': 'Failed to load weather',
       'noInternetMessage':
           'No internet connection.\nPlease check your network settings.',
-      'noSearchResults':
-          'No cities found.\nTry a different search term.',
+      'noSearchResults': 'No cities found.\nTry a different search term.',
       'setAsDefaultSnack': '{city} set as default',
       'defaultBadge': 'DEFAULT',
     },
@@ -116,7 +125,17 @@ class AppLocalizations {
       'humidity': 'Độ ẩm',
       'wind': 'Gió',
       'feelsLike': 'Cảm giác như',
-      'uvIndex': 'Chỉ số UV',
+      'airQuality': 'Chất lượng không khí',
+      'aqiGood': 'Tốt',
+      'aqiFair': 'Khá',
+      'aqiModerate': 'Trung bình',
+      'aqiPoor': 'Kém',
+      'aqiVeryPoor': 'Rất kém',
+      'aqiAdviceGood': 'Tuyệt vời để ra ngoài',
+      'aqiAdviceFair': 'Người nhạy cảm lưu ý',
+      'aqiAdviceModerate': 'Giảm thời gian ở ngoài trời',
+      'aqiAdvicePoor': 'Không khí ô nhiễm',
+      'aqiAdviceVeryPoor': 'Độc hại, ở trong nhà',
       'sunrise': 'Bình minh',
       'sunset': 'Hoàng hôn',
       'visibility': 'Tầm nhìn',
@@ -156,8 +175,7 @@ class AppLocalizations {
       'failedToLoadWeather': 'Không thể tải dữ liệu thời tiết',
       'noInternetMessage':
           'Không có kết nối internet.\nVui lòng kiểm tra cài đặt mạng.',
-      'noSearchResults':
-          'Không tìm thấy thành phố.\nThử từ khóa khác.',
+      'noSearchResults': 'Không tìm thấy thành phố.\nThử từ khóa khác.',
       'setAsDefaultSnack': '{city} đã được đặt làm mặc định',
       'defaultBadge': 'MẶC ĐỊNH',
     },
@@ -200,7 +218,17 @@ class AppLocalizations {
   String get humidity => translate('humidity');
   String get wind => translate('wind');
   String get feelsLike => translate('feelsLike');
-  String get uvIndex => translate('uvIndex');
+  String get airQuality => translate('airQuality');
+  String get aqiGood => translate('aqiGood');
+  String get aqiFair => translate('aqiFair');
+  String get aqiModerate => translate('aqiModerate');
+  String get aqiPoor => translate('aqiPoor');
+  String get aqiVeryPoor => translate('aqiVeryPoor');
+  String get aqiAdviceGood => translate('aqiAdviceGood');
+  String get aqiAdviceFair => translate('aqiAdviceFair');
+  String get aqiAdviceModerate => translate('aqiAdviceModerate');
+  String get aqiAdvicePoor => translate('aqiAdvicePoor');
+  String get aqiAdviceVeryPoor => translate('aqiAdviceVeryPoor');
   String get sunrise => translate('sunrise');
   String get sunset => translate('sunset');
   String get loading => translate('loading');
