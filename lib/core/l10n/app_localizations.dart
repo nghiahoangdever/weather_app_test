@@ -95,6 +95,12 @@ class AppLocalizations {
       'noSearchResults': 'No cities found.\nTry a different search term.',
       'setAsDefaultSnack': '{city} set as default',
       'defaultBadge': 'DEFAULT',
+      'studentName': 'Name',
+      'studentId': 'Student ID',
+      'major': 'Major',
+      'classInfo': 'Class',
+      'member1': 'Member 1',
+      'member2': 'Member 2',
     },
     'vi': {
       'appName': 'Thời Tiết',
@@ -178,6 +184,12 @@ class AppLocalizations {
       'noSearchResults': 'Không tìm thấy thành phố.\nThử từ khóa khác.',
       'setAsDefaultSnack': '{city} đã được đặt làm mặc định',
       'defaultBadge': 'MẶC ĐỊNH',
+      'studentName': 'Họ tên',
+      'studentId': 'Mã sinh viên',
+      'major': 'Ngành',
+      'classInfo': 'Lớp',
+      'member1': 'Thành viên 1',
+      'member2': 'Thành viên 2',
     },
   };
 
@@ -251,6 +263,13 @@ class AppLocalizations {
   String get setDefault => translate('setDefault');
   String get visibility => translate('visibility');
   String get pressure => translate('pressure');
+  String get aboutApp => translate('aboutApp');
+  String get studentName => translate('studentName');
+  String get studentId => translate('studentId');
+  String get major => translate('major');
+  String get classInfo => translate('classInfo');
+  String get member1 => translate('member1');
+  String get member2 => translate('member2');
 
   String confirmRemoveCity(String cityName) =>
       translateWith('confirmRemoveCity', {'city': cityName});

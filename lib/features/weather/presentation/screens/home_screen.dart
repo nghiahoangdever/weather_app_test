@@ -850,6 +850,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         .setThemeMode(value ? ThemeMode.dark : ThemeMode.light);
                   },
                 ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.info_outline_rounded),
+                  title: Text(l10n.aboutApp),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: () {
+                    Navigator.pop(context); // Close bottom sheet
+                    Navigator.of(context).pushNamed(AppRouter.aboutUs);
+                  },
+                ),
                 const SizedBox(height: 16),
               ],
             ),

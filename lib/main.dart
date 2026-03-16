@@ -21,12 +21,12 @@ void main() async {
   // Initialize SharedPreferences before app starts
   final prefs = await SharedPreferences.getInstance();
 
-  runApp(ProviderScope(
-    overrides: [
-      sharedPreferencesProvider.overrideWithValue(prefs),
-    ],
-    child: const WeatherApp(),
-  ));
+  runApp(
+    ProviderScope(
+      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+      child: const WeatherApp(),
+    ),
+  );
 }
 
 class WeatherApp extends ConsumerWidget {
